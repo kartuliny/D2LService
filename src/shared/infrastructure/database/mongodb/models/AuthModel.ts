@@ -8,7 +8,8 @@ export interface IAuth extends Document {
     discord_access_token: string,
     discord_refresh_token: string,
     expires: number,
-    last_activity: number
+    last_activity: number,
+    session_id: string
 }
 
 // Esquema del modelo
@@ -19,7 +20,8 @@ const AuthSchema: Schema = new Schema({
     discord_access_token: { type: String, required: true },
     discord_refresh_token: { type: String, required: true },
     expires: { type: Number },
-    last_activity: { type: Number }
+    last_activity: { type: Number },
+    session_id: { type: String }
 })
 
 // Modelo

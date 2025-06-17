@@ -9,6 +9,8 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - backend-network
 
   mongo-express:
     image: mongo-express:latest
@@ -19,11 +21,42 @@ services:
       ME_CONFIG_MONGODB_AUTH_USERNAME: admin
       ME_CONFIG_MONGODB_AUTH_PASSWORD: pass
       ME_CONFIG_MONGODB_URL: mongodb://admin:pass@mongodb:27017/
-      ME_CONFIG_MONGODB_SERVER: mongodb  # Asegúrate de que este nombre coincide con el nombre del servicio "mongodb"
-      ME_CONFIG_OPTIONS_EDITORTHEME: ambiance  # Opcional, para cambiar el tema
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
     ports:
       - "8081:8081"
+    networks:
+      - backend-network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: pass
+    networks:
+      - backend-network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  
+  wsservice:
+    build: ./services/wsservice
+    ports:
+      - "3010:3010"
+    environment:
+      RABBITMQ_URL: amqp://admin:pass@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    networks:
+      - backend-network
 
 volumes:
   mongodb_data:
     driver: local
+  rabbitmq_data:
+
+networks:
+  backend-network:
+    driver: bridge
